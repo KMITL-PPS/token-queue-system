@@ -11,6 +11,6 @@ load_key()
 def hello():
     return render_template('index.html', name=create_queue())
 
-@app.route('/decode/<token>')
+@app.route('/decode/<token>')  # test purpose only
 def decode(token):
     return render_template('index.html', name=get_queue(token))
