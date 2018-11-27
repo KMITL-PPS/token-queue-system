@@ -46,8 +46,10 @@
 		<div class="jumbotron">
 			<h1>Token Queue</h1>
 			<div class="row"><div class="col-4 offset-4">
-				<h3>Queue remaining {{queue_remain}}</h3>
-				<button class="btn btn-lg btn-success btn-block" type="submit">QUEUE</button>
+                <h3>Your QUEUE is {{cutomer_queue}}</h3>
+                <div class="thumbnail">
+					<img src="{{ url_for("static", filename="QR_code.png") }}">
+				</div>
 			</div></div>				
 		</div>
 	</div>
