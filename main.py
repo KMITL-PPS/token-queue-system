@@ -9,7 +9,7 @@ load_key()
 
 @app.route('/')
 def hello():
-    return render_template('login.html', name=create_queue())
+    return render_template('customerQueue.html', name=create_queue())
 
 @app.route('/decode/<token>')  # test purpose only
 def decode(token):
