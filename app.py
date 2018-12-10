@@ -2,13 +2,13 @@ import os
 
 from dotenv import load_dotenv
 from flask import Flask, flash, redirect, render_template, url_for
-from flask_login import LoginManager, login_user, logout_user, login_required
+from flask_login import LoginManager, login_required, login_user, logout_user
 from passlib.hash import bcrypt
 
 from forms import LoginForm
 from functions.config import load_config
 from functions.key import load_key
-from functions.queue import create_queue, get_queue
+from functions.queue import create_queue, get_queue, remaining_queue
 from models import Manager, db
 
 
@@ -45,7 +45,7 @@ def load_user(user_id):
 
 @app.route('/')
 def index():
-    return render_template('customerQueue.html')
+    return render_template('customerQueue.html', queue_remain=remaining_queue())
 
 @app.route('/qr')
 def qr():
