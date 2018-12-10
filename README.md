@@ -18,3 +18,8 @@ python -c "from app import db; db.create_all()"
 ```
 sudo FLASK_ENV=development flask run
 ```
+
+## Create Manager
+```
+sudo python create_manager.py
+```
