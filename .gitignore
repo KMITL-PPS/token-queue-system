@@ -1,6 +1,7 @@
 ## Custom ##
 config.json
 .env
+*.db
 
 
 # Created by https://www.gitignore.io/api/python,visualstudiocode,macos,windows,flask

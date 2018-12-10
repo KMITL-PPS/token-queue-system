@@ -13,17 +13,20 @@ def load_key():
     global suite
     key = read_config('key')
     if key is None or key == '':
-        generate_key()
+        set_key(key=generate_key())
     else:
         suite = Fernet(key.encode())
 
 
-def generate_key(reload: bool = True):
-    global suite
-    new_key = Fernet.generate_key()
-    write_config('key', new_key.decode())
+def generate_key(decoded: bool = False):
+    key = Fernet.generate_key()
+    return key.decode() if decoded else key
+
+
+def set_key(key, reload: bool = True):
+    write_config('key', key.decode())
     if reload:
-        suite = Fernet(new_key)
+        suite = Fernet(key)
 
 
 def encrypt(data) -> str:

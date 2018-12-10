@@ -10,7 +10,11 @@ Queue System Implementation Using Token with QR Code
 ```
 pip install -r requirements.txt
 ```
-3. Run application
+3. Create database
 ```
-FLASK_APP=main.py flask run
+python -c "from app import db; db.create_all()"
+```
+4. Run application with **sudo only**
+```
+sudo FLASK_ENV=development flask run
 ```
