@@ -65,16 +65,18 @@
 			<h1>Token Queue</h1>
 			<div class="row">
                 <div class="col">
-                    <h4>Previous Queue</h4>
-				    <h3>12</h3>
-                    <button class="btn btn-lg btn-warning btn-block" type="submit">BACK</button>
+					{% if queue > 1 %}
+						<h4>Previous Queue</h4>
+						<h3>{{ queue - 1 }}</h3>
+						<button class="btn btn-lg btn-warning btn-block" type="submit">BACK</button>
+					{% endif %}
                 </div>
                 <div class="col-6">
-                    <div class="queue">13</div>
+                    <div class="queue">{{ queue }}</div>
                 </div>
                 <div class="col">
                     <h4>Next Queue</h4>
-                    <h3>14</h3>
+                    <h3>{{ queue + 1 }}</h3>
                     <button class="btn btn-lg btn-success btn-block" type="submit">NEXT</button>
                 </div>
             </div>				

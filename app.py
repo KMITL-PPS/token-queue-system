@@ -9,7 +9,7 @@ from forms import LoginForm
 from functions.config import load_config
 from functions.key import load_key
 from functions.qr import generate_qr
-from functions.queue import create_queue, remaining_queue
+from functions.queue import create_queue, get_queue, remaining_queue
 from models import Manager, db
 
 
@@ -76,13 +76,17 @@ def _login():
 @app.route('/admin')
 @login_required
 def admin():
-    return render_template('adminQueue.html')
+    return render_template('adminQueue.html', queue=get_queue())
 
 @app.route('/logout')
 @login_required
 def logout():
     logout_user()
     return redirect(url_for('index'))
+
+@login_manager.unauthorized_handler
+def unauthorized():
+    return redirect(url_for('_login'))
 
 if __name__ == '__main__':
     app.run()

@@ -16,6 +16,10 @@ def create_queue() -> str:
     return queue
 
 
+def get_queue() -> int:
+    return read_config('current_queue')
+
+
 def next_queue() -> int:
     queue = increase_read_config('current_queue')
     if queue is None:  # error occurred
