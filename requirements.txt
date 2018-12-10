@@ -7,6 +7,7 @@ cryptography==2.4.1
 Flask==1.0.2
 Flask-Login==0.4.1
 Flask-SQLAlchemy==2.3.2
+Flask-WTF==0.14.2
 idna==2.7
 isort==4.3.4
 itsdangerous==1.1.0
@@ -23,3 +24,4 @@ SQLAlchemy==1.2.14
 typed-ast==1.1.0
 Werkzeug==0.14.1
 wrapt==1.10.11
+WTForms==2.2.1
