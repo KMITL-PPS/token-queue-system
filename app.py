@@ -8,7 +8,8 @@ from passlib.hash import bcrypt
 from forms import LoginForm
 from functions.config import load_config
 from functions.key import load_key
-from functions.queue import create_queue, get_queue, remaining_queue
+from functions.qr import generate_qr
+from functions.queue import create_queue, remaining_queue
 from models import Manager, db
 
 
@@ -49,7 +50,9 @@ def index():
 
 @app.route('/qr')
 def qr():
-    return render_template('customerQR.html')
+    queue = create_queue()
+    qr_code = generate_qr(queue)
+    return render_template('customerQR.html', queue_remain=remaining_queue(), customer_queue=queue, qr=qr_code)
 
 @app.route('/login', methods=['GET', 'POST'])
 def _login():
@@ -74,10 +77,6 @@ def _login():
 @login_required
 def admin():
     return render_template('adminQueue.html')
-
-@app.route('/decode/<token>')  # test purpose only
-def decode(token):
-    return render_template('index.html', name=get_queue(token))
 
 @app.route('/logout')
 @login_required

@@ -1,14 +1,11 @@
 import json
 
 from functions.config import increase_read_config, read_config, write_config
-from functions.key import decrypt, encrypt, generate_key
 
 
-def reset_queue(regenerate_key: bool = True):
+def reset_queue():
     write_config('total_queue', 0)
     write_config('current_queue', 0)
-    if regenerate_key:
-        generate_key()
 
 
 def create_queue() -> str:
@@ -16,11 +13,7 @@ def create_queue() -> str:
     if queue is None:  # error occurred
         return None
 
-    return encrypt(queue)
-
-
-def get_queue(token: str) -> int:
-    return decrypt(token)
+    return queue
 
 
 def next_queue() -> int:
