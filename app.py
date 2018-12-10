@@ -71,12 +71,19 @@ def _login():
     return render_template('login.html', form=form)
 
 @app.route('/admin')
+@login_required
 def admin():
     return render_template('adminQueue.html')
 
 @app.route('/decode/<token>')  # test purpose only
 def decode(token):
     return render_template('index.html', name=get_queue(token))
+
+@app.route('/logout')
+@login_required
+def logout():
+    logout_user()
+    return redirect(url_for('index'))
 
 if __name__ == '__main__':
     app.run()
