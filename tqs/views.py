@@ -1,4 +1,5 @@
 import json
+import os
 
 from flask import jsonify, redirect, render_template, request, session, \
     url_for
@@ -6,7 +7,7 @@ from flask_jwt import jwt_required
 from flask_login import login_required, login_user, logout_user, \
     current_user
 
-from tqs import app
+from tqs import app, utils
 from tqs.auth import login_manager, auth_user
 from tqs.forms import LoginForm
 from tqs.functions.key import decrypt, generate_key, set_key, get_key_id
@@ -15,6 +16,10 @@ from tqs.functions.queue import can_next_queue, create_queue, get_queue, \
     get_queue_status, next_queue, previous_queue, remaining_queue, \
     reset_queue
 from tqs.models import Manager
+
+
+# load setting
+queue_interval = os.environ.get('QUEUE_INTERVAL', 5000)
 
 
 @login_manager.user_loader
@@ -48,6 +53,10 @@ def qr():
 
 @app.route('/login', methods=['GET', 'POST'])
 def _login():
+    # redirect if logged in
+    if current_user is not None:
+        return redirect(url_for('admin'))
+
     error = None
     form = LoginForm()
 
