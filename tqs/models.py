@@ -31,5 +31,5 @@ class Log(db.Model):
     logger = db.Column(db.String)
     level = db.Column(db.String)
     trace = db.Column(db.String)
-    message = db.Column(db.String)
+    message = db.Column(db.Text)
     create_at = db.Column(db.DateTime, default=datetime.now)

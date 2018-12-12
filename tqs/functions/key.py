@@ -24,6 +24,11 @@ def generate_key(decoded: bool = False):
     return key.decode() if decoded else key
 
 
+def get_key_id():
+    key = read_config('key')
+    return key[:3]
+
+
 def set_key(key, reload: bool = True):
     write_config('key', key.decode())
     if reload:

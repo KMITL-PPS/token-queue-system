@@ -2,11 +2,12 @@ from getpass import getpass
 
 from passlib.hash import bcrypt
 
-from tqs import db
+from tqs import app, db
 from tqs.models import Manager
 
 
-if __name__ == '__main__':
+@app.cli.command()
+def create_manager():
     alias = input('Alias: ')
     username = input('Username: ')
     password_input = getpass('Password: ')

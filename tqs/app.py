@@ -6,13 +6,15 @@ import os
 from flask import flash, jsonify, redirect, render_template, request, \
     url_for
 from flask_jwt import jwt_required
-from flask_login import LoginManager, login_required, login_user, logout_user
+from flask_login import LoginManager, login_required, login_user, logout_user, \
+    current_user
 
 from tqs import app, logging
 from tqs.auth import login_manager, auth_user
+from tqs.commands import create_manager
 from tqs.forms import LoginForm
 from tqs.functions.config import load_config
-from tqs.functions.key import decrypt, generate_key, load_key, set_key
+from tqs.functions.key import decrypt, generate_key, load_key, set_key, get_key_id
 from tqs.functions.qr import generate_qr
 from tqs.functions.queue import can_next_queue, create_queue, get_queue, \
     get_queue_status, next_queue, previous_queue, remaining_queue, \
@@ -42,6 +44,8 @@ def index():
 def qr():
     queue = create_queue()
     qr_code = generate_qr(queue)
+
+    app.logger.info(f'Created queue. (queue={queue}, key={get_key_id()})')
     return render_template('customerQR.html', queue_remain=remaining_queue() - 1, customer_queue=queue, qr=qr_code)
 
 
@@ -55,9 +59,11 @@ def _login():
         manager = auth_user(username=form.username.data, password=form.password.data)
         if manager is not None:
             login_user(manager)
+
             app.logger.info(f'Manager `{manager.alias}` logged in.')
             flash('Log in successfully!')
             return redirect(url_for('admin'))
+
         app.logger.info(f'Attempt to log in with username `{form.username.data}`.')
         flash('Invalid username or password!')
 
@@ -81,8 +87,8 @@ def queue_any_next():
 @login_required
 def queue_next():
     queue = next_queue()
-    if queue is None:
-        flash('Cannot change queue!')
+
+    app.logger.info(f'Manager `{current_user.alias}` moved to next queue. (queue={queue}, key={get_key_id()})')
     return redirect(url_for('admin'))
 
 
@@ -90,8 +96,8 @@ def queue_next():
 @login_required
 def queue_previous():
     queue = previous_queue()
-    if queue is None:
-        flash('Cannot change queue!')
+
+    app.logger.info(f'Manager `{current_user.alias}` moved to previous queue. (queue={queue}, key={get_key_id()})')
     return redirect(url_for('admin'))
 
 
@@ -101,6 +107,8 @@ def queue_reset():
     reset_queue()
     new_key = generate_key()
     set_key(new_key, reload=True)
+
+    app.logger.warning(f'Manager `{current_user.alias}` reset queue. (key={get_key_id()})')
     return redirect(url_for('admin'))
 
 
@@ -115,6 +123,8 @@ def queue_verify():
     try:
         response_data = decrypt(data)
     except Exception as e:
+        app.logger.warning(f'Manager `{current_user.alias} failed to verify QR code (data={data})`', exc_info=1)
+
         response_data = {
             'error': 'Error',
             'description': str(e)
@@ -135,12 +145,15 @@ def queue_verify():
 @app.route('/logout', methods=['GET'])
 @login_required
 def logout():
+    app.logger.info(f'Manager `{current_user.alias}` logged out.')
+
     logout_user()
     return redirect(url_for('index'))
 
 
 @login_manager.unauthorized_handler
 def unauthorized():
+    app.logger.warning('Attempted request to unauthorized page.')
     return redirect(url_for('_login'))
 
 
