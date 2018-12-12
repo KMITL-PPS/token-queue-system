@@ -15,7 +15,7 @@ from tqs.functions.qr import generate_qr
 from tqs.functions.queue import can_next_queue, create_queue, get_queue, \
     get_queue_status, next_queue, previous_queue, remaining_queue, \
     reset_queue
-from tqs.models import Manager
+from tqs.models import Manager, Queue
 
 
 # load setting
@@ -35,9 +35,15 @@ def index():
 @app.route('/qr', methods=['GET'])
 def qr():
     key_id = get_key_id()
-    if session.get('key_id', None) == key_id and session.get('queue', None) >= get_queue():  #TODO: implement using db
-        queue = session.get('queue', None)
-    else:
+    queue = session.get('queue', None)
+
+    create = True
+    if queue is not None:
+        queue_obj = Queue.query.filter_by(queue=queue, key=key_id).first()
+        if queue_obj is not None and queue >= get_queue():
+            create = False
+
+    if create:
         queue = create_queue()
 
         # save to session
@@ -47,8 +53,10 @@ def qr():
         app.logger.info(f'Created queue. (queue={queue}, key={key_id})')
 
     qr_code = generate_qr(queue)
-
-    return render_template('customerQR.html', queue_remain=remaining_queue() - 1, customer_queue=queue, qr=qr_code)
+    queue_remain = remaining_queue() - 1
+    if queue_remain < 0:
+        queue_remain = 0
+    return render_template('customerQR.html', queue_remain=queue_remain, customer_queue=queue, qr=qr_code)
 
 
 @app.route('/login', methods=['GET', 'POST'])
