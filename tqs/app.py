@@ -3,7 +3,7 @@ import logging
 import logging.config
 import os
 
-from flask import flash, jsonify, redirect, render_template, request, \
+from flask import flash, jsonify, redirect, render_template, request, session, \
     url_for
 from flask_jwt import jwt_required
 from flask_login import LoginManager, login_required, login_user, logout_user, \
@@ -42,10 +42,20 @@ def index():
 
 @app.route('/qr', methods=['GET'])
 def qr():
-    queue = create_queue()
+    key_id = get_key_id()
+    if session.get('key_id', None) == key_id and session.get('queue', None) >= get_queue():  #TODO: implement using db
+        queue = session.get('queue', None)
+    else:
+        queue = create_queue()
+
+        # save to session
+        session['key_id'] = key_id
+        session['queue'] = queue
+
+        app.logger.info(f'Created queue. (queue={queue}, key={key_id})')
+
     qr_code = generate_qr(queue)
 
-    app.logger.info(f'Created queue. (queue={queue}, key={get_key_id()})')
     return render_template('customerQR.html', queue_remain=remaining_queue() - 1, customer_queue=queue, qr=qr_code)
 
 
