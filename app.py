@@ -1,6 +1,8 @@
 import json
 import os
+import traceback
 
+import logging.config
 from dotenv import load_dotenv
 from flask import Flask, flash, jsonify, redirect, render_template, request, \
     url_for
@@ -15,14 +17,14 @@ from functions.qr import generate_qr
 from functions.queue import can_next_queue, create_queue, get_queue, \
     get_queue_status, next_queue, previous_queue, remaining_queue, \
     reset_queue
-from models import Manager, db
+from models import Log, Manager, db
 
 
+# load flask
 app = Flask(__name__)
 
 # load environment
 load_dotenv()
-queue_interval = os.environ.get('QUEUE_INTERVAL', 5000)
 
 # app config
 db_path = os.path.join(os.path.dirname(__file__), 'app.db')
@@ -31,6 +33,35 @@ app.config.update(
     SQLALCHEMY_DATABASE_URI=os.environ.get('DB_URI', 'sqlite:///{}'.format(db_path)),
     SQLALCHEMY_TRACK_MODIFICATIONS=False,
 )
+
+# init db
+with app.app_context():
+    db.app = app
+    db.init_app(app)
+
+# load logger
+class SQLAlchemyHandler(logging.StreamHandler):
+    def emit(self, record):
+        trace = None
+        exc = record.__dict__['exc_info']
+        if exc:
+            trace = traceback.format_exc()
+        log = Log(
+            logger=record.__dict__['name'],
+            level=record.__dict__['levelname'],
+            trace=trace,
+            message=record.__dict__['msg'],)
+        db.session.add(log)
+        db.session.commit()
+
+db_handler = SQLAlchemyHandler()
+db_handler.setLevel(logging.INFO)
+app.logger.handlers[0].setLevel(logging.WARNING)
+app.logger.addHandler(db_handler)
+app.logger.setLevel(logging.INFO)
+
+# load setting
+queue_interval = os.environ.get('QUEUE_INTERVAL', 5000)
 
 # JWT
 def identity(payload):
@@ -65,7 +96,6 @@ load_key()
 
 @login_manager.user_loader
 def load_user(manager_id: int):
-    print(manager_id)
     return Manager.query.get(manager_id)
 
 
@@ -91,8 +121,10 @@ def _login():
         manager = auth_user(username=form.username.data, password=form.password.data)
         if manager is not None:
             login_user(manager)
+            app.logger.info(f'Manager `{manager.alias}` logged in.')
             flash('Log in successfully!')
             return redirect(url_for('admin'))
+        app.logger.info(f'Attempt to log in with username `{form.username.data}`.')
         flash('Invalid username or password!')
 
     # GET
