@@ -60,3 +60,20 @@ def increase_read_config(key: str) -> str:
         f.truncate()
 
         return data + 1
+
+
+def decrease_read_config(key: str) -> str:
+    with open(CONFIG_FILE, 'r+') as f:
+        json_data = json.load(f)
+        try:
+            data = int(json_data[key])
+        except (IndexError, ValueError):
+            return None
+
+        json_data[key] = data - 1
+
+        f.seek(0)
+        json.dump(json_data, f, indent=4)
+        f.truncate()
+
+        return data - 1

@@ -1,17 +1,22 @@
 <html>
+
 <head>
-    <title>TOKEN QUEUE</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
-    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+	<title>TOKEN QUEUE</title>
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO"
+	 crossorigin="anonymous">
+	<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy"
+	 crossorigin="anonymous"></script>
+	<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+	 crossorigin="anonymous"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49"
+	 crossorigin="anonymous"></script>
 	<style>
 		body {
 			padding-top: 40px;
 			padding-bottom: 40px;
 			background-color: #e4e4e4;
 		}
-		.jumbotron { 
+		.jumbotron {
 			padding: 50px; /* fills out the jumbotron */
 			background-color: #192152;
 		}
@@ -22,7 +27,7 @@
 			padding: 0 15px; /* adds some padding to the left and right*/
 		}
 
-		.jumbotron h1 { 
+		.jumbotron h1 {
 			text-align: center; /* centers the heading */
 			color: rgb(255, 255, 255);
 			font-family: 'Raleway', Helvetica, Arial, sans-serif;
@@ -30,8 +35,8 @@
 			text-transform: uppercase;
 			padding-bottom: 40px;
 		}
-        
-        .jumbotron h3 { 
+
+        .jumbotron h3 {
 			text-align: center; /* centers the heading */
 			color: rgba(255, 255, 255, 0.822);
 			font-family: 'Raleway', Helvetica, Arial, sans-serif;
@@ -39,7 +44,7 @@
 			padding-bottom: 20px;
 		}
 
-        .jumbotron h4 { 
+        .jumbotron h4 {
 			text-align: center; /* centers the heading */
 			color: rgba(255, 255, 255, 0.822);
 			font-family: 'Raleway', Helvetica, Arial, sans-serif;
@@ -56,33 +61,59 @@
             font-size: 100px;
 			padding-bottom: 20px;
         }
-				
 	</style>
 </head>
+
 <body>
 	<div class="container">
 		<div class="jumbotron">
 			<h1>Token Queue</h1>
 			<div class="row">
-                <div class="col">
+				<div class="col">
 					{% if queue > 1 %}
-						<h4>Previous Queue</h4>
-						<h3>{{ queue - 1 }}</h3>
-						<button class="btn btn-lg btn-warning btn-block" type="submit">BACK</button>
+					<h4>Previous Queue</h4>
+					<h3>{{ queue - 1 }}</h3>
+					<a href="{{ url_for('queue_previous') }}" class="btn btn-lg btn-warning btn-block">BACK</a>
 					{% endif %}
-                </div>
-                <div class="col-6">
-                    <div class="queue">{{ queue }}</div>
-                </div>
-                <div class="col">
-                    <h4>Next Queue</h4>
-                    <h3>{{ queue + 1 }}</h3>
-                    <button class="btn btn-lg btn-success btn-block" type="submit">NEXT</button>
-                </div>
-            </div>				
+				</div>
+				<div class="col-6">
+					<div class="queue">{{ queue }}</div>
+				</div>
+				<div class="col">
+					<div id="next-queue" style="visibility: hidden;">
+						<h4>Next Queue</h4>
+						<h3>{{ queue + 1 }}</h3>
+						<a href="{{ url_for('queue_next') }}" class="btn btn-lg btn-success btn-block">NEXT</a>
+					</div>
+				</div>
+			</div>
 		</div>
 	</div>
-    <button class="btn btn-lg btn-link btn-block" type="submit">RESET</button>
+	<a href="{{ url_for('queue_reset') }}" class="btn btn-lg btn-link btn-block">RESET</a>
 
+	<script>
+		const url = '/queue/any-next';
+
+		function checkNextQueue() {
+			fetch(url)
+				.then((res) => {
+					return res.json();
+				})
+				.then((data) => {
+					if (data.next) {
+						document.getElementById('next-queue').style.visibility = 'visible';
+					} else {
+						document.getElementById('next-queue').style.visibility = 'hidden';
+					}
+				});
+		}
+
+		checkNextQueue();
+
+		setInterval(() => {
+			checkNextQueue();
+		}, {{ interval }});
+	</script>
 </body>
+
 </html>
