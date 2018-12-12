@@ -4,7 +4,7 @@ from json import JSONDecodeError
 
 from cryptography.fernet import Fernet, InvalidToken, InvalidSignature
 
-from functions.config import read_config, write_config
+from tqs.functions.config import read_config, write_config
 
 
 suite = None

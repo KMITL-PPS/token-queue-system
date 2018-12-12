@@ -1,93 +1,27 @@
 import json
-import os
-import traceback
-
+import logging
 import logging.config
-from dotenv import load_dotenv
-from flask import Flask, flash, jsonify, redirect, render_template, request, \
-    url_for
-from flask_jwt import JWT, jwt_required
-from flask_login import LoginManager, login_required, login_user, logout_user
-from passlib.hash import bcrypt
+import os
 
-from forms import LoginForm
-from functions.config import load_config
-from functions.key import decrypt, generate_key, load_key, set_key
-from functions.qr import generate_qr
-from functions.queue import can_next_queue, create_queue, get_queue, \
+from flask import flash, jsonify, redirect, render_template, request, \
+    url_for
+from flask_jwt import jwt_required
+from flask_login import LoginManager, login_required, login_user, logout_user
+
+from tqs import app, logging
+from tqs.auth import login_manager, auth_user
+from tqs.forms import LoginForm
+from tqs.functions.config import load_config
+from tqs.functions.key import decrypt, generate_key, load_key, set_key
+from tqs.functions.qr import generate_qr
+from tqs.functions.queue import can_next_queue, create_queue, get_queue, \
     get_queue_status, next_queue, previous_queue, remaining_queue, \
     reset_queue
-from models import Log, Manager, db
+from tqs.models import Log, Manager
 
-
-# load flask
-app = Flask(__name__)
-
-# load environment
-load_dotenv()
-
-# app config
-db_path = os.path.join(os.path.dirname(__file__), 'app.db')
-app.config.update(
-    SECRET_KEY=os.environ.get('SECRET_KEY', 'CHANGE THIS'),
-    SQLALCHEMY_DATABASE_URI=os.environ.get('DB_URI', 'sqlite:///{}'.format(db_path)),
-    SQLALCHEMY_TRACK_MODIFICATIONS=False,
-)
-
-# init db
-with app.app_context():
-    db.app = app
-    db.init_app(app)
-
-# load logger
-class SQLAlchemyHandler(logging.StreamHandler):
-    def emit(self, record):
-        trace = None
-        exc = record.__dict__['exc_info']
-        if exc:
-            trace = traceback.format_exc()
-        log = Log(
-            logger=record.__dict__['name'],
-            level=record.__dict__['levelname'],
-            trace=trace,
-            message=record.__dict__['msg'],)
-        db.session.add(log)
-        db.session.commit()
-
-db_handler = SQLAlchemyHandler()
-db_handler.setLevel(logging.INFO)
-app.logger.handlers[0].setLevel(logging.WARNING)
-app.logger.addHandler(db_handler)
-app.logger.setLevel(logging.INFO)
 
 # load setting
 queue_interval = os.environ.get('QUEUE_INTERVAL', 5000)
-
-# JWT
-def identity(payload):
-    manager_id = payload['identity']
-    return Manager.query.get(manager_id)
-
-def auth_user(username: str, password: str):
-    # get user
-    manager = Manager.query.filter(Manager.username == username).first()
-    # verify password if user is exists
-    if manager is not None and bcrypt.verify(password, manager.password):
-        return manager
-    return None
-
-# init jwt
-jwt = JWT(app, auth_user, identity)
-
-# init app
-with app.app_context():
-    # database
-    db.app = app
-    db.init_app(app)
-
-    # login manager
-    login_manager = LoginManager()
-    login_manager.init_app(app)
 
 # load config/key
 load_config()

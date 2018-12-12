@@ -1,9 +1,11 @@
 import json
+import logging
 import os
 from builtins import ValueError
 
 
 CONFIG_FILE = 'config.json'
+logger = logging.getLogger(__name__)
 
 
 def create_config(data: dict):
@@ -17,7 +19,7 @@ def load_config():
         with open(CONFIG_FILE, 'r+') as f:
             pass
     except FileNotFoundError:
-        from functions.key import generate_key
+        from tqs.functions.key import generate_key
         data = {
             'key': generate_key(decoded=True),
             'total_queue': 0,
@@ -50,8 +52,9 @@ def increase_read_config(key: str) -> str:
         json_data = json.load(f)
         try:
             data = int(json_data[key])
-        except (IndexError, ValueError):
-            return None
+        except (IndexError, ValueError) as e:
+            logger.error('Increase read config error.', exc_info=1)
+            return 0
 
         json_data[key] = data + 1
 
@@ -68,6 +71,7 @@ def decrease_read_config(key: str) -> str:
         try:
             data = int(json_data[key])
         except (IndexError, ValueError):
+            logger.error('Decrease read config error.', exc_info=1)
             return None
 
         json_data[key] = data - 1

@@ -2,8 +2,8 @@ from getpass import getpass
 
 from passlib.hash import bcrypt
 
-from app import db
-from models import Manager
+from tqs import db
+from tqs.models import Manager
 
 
 if __name__ == '__main__':

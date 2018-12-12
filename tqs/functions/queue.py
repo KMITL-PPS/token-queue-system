@@ -1,18 +1,27 @@
 import json
+import logging
 
-from functions.config import increase_read_config, read_config, write_config, decrease_read_config
+from flask_login import current_user
+
+from tqs import app
+from tqs.functions.config import decrease_read_config, increase_read_config, \
+    read_config, write_config
+
+
+logger = logging.getLogger('flask.app.queue')
 
 
 def reset_queue():
     write_config('total_queue', 0)
     write_config('current_queue', 0)
 
+    logger.info(f'Manager `{current_user.alias}` reset queue.')
+
 
 def create_queue() -> str:
     queue = increase_read_config('total_queue')
-    if queue is None:  # error occurred
-        return None
-
+    # TODO: insert to db
+    logger.info(f'Created queue #{queue}.')
     return queue
 
 
