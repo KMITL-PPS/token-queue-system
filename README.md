@@ -5,21 +5,32 @@ Queue System Implementation Using Token with QR Code
 * Python 3.5+
 
 ## Installation
+**Note:** Always run with sudo permission
+
 1. Activate python virtual environment (if any)
-2. Install requirements
+2. Get into project's root directory
+```
+cd token-queue-system
+```
+3. Install requirements
 ```
 pip install -r requirements.txt
 ```
-3. Create database
+4. Set Flask environment variable
 ```
-python -c "from app import db; db.create_all()"
+export FLASK_APP=tqs/app
+export FLASK_ENV=development
 ```
-4. Run application with **sudo only**
+5. Init database
 ```
-sudo FLASK_ENV=development flask run
+sudo flask init-db
+```
+6. Run application with **sudo only**
+```
+sudo flask run
 ```
 
 ## Create Manager
 ```
-sudo python create_manager.py
+sudo flask create-manager
 ```

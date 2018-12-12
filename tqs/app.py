@@ -11,7 +11,7 @@ from flask_login import LoginManager, login_required, login_user, logout_user, \
 
 from tqs import app, logging
 from tqs.auth import login_manager, auth_user
-from tqs.commands import create_manager
+from tqs.commands import create_manager, init_db
 from tqs.forms import LoginForm
 from tqs.functions.config import load_config
 from tqs.functions.key import decrypt, generate_key, load_key, set_key, get_key_id

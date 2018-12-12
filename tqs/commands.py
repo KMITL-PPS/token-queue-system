@@ -7,6 +7,12 @@ from tqs.models import Manager
 
 
 @app.cli.command()
+def init_db():
+    db.create_all()
+    print('Success!')
+
+
+@app.cli.command()
 def create_manager():
     alias = input('Alias: ')
     username = input('Username: ')

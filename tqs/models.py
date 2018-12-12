@@ -20,7 +20,7 @@ class Queue(db.Model):
     )
 
     id = db.Column(db.Integer, primary_key=True)
-    key = db.Column(db.String(6))
+    key = db.Column(db.String(3))
     queue = db.Column(db.Integer)
     issue_dt = db.Column(db.DateTime, default=datetime.now)
     used = db.Column(db.Boolean, default=False)
