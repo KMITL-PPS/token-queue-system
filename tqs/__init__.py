@@ -24,3 +24,8 @@ app.config.update(
 with app.app_context():
     db.app = app
     db.init_app(app)
+
+from tqs import commands, logging, views, utils
+
+if __name__ == '__main__':
+    app.run()

@@ -1,33 +1,20 @@
 import json
-import logging
-import logging.config
-import os
 
-from flask import flash, jsonify, redirect, render_template, request, session, \
+from flask import jsonify, redirect, render_template, request, session, \
     url_for
 from flask_jwt import jwt_required
-from flask_login import LoginManager, login_required, login_user, logout_user, \
+from flask_login import login_required, login_user, logout_user, \
     current_user
 
-from tqs import app, logging
+from tqs import app
 from tqs.auth import login_manager, auth_user
-from tqs.commands import create_manager, init_db
 from tqs.forms import LoginForm
-from tqs.functions.config import load_config
-from tqs.functions.key import decrypt, generate_key, load_key, set_key, get_key_id
+from tqs.functions.key import decrypt, generate_key, set_key, get_key_id
 from tqs.functions.qr import generate_qr
 from tqs.functions.queue import can_next_queue, create_queue, get_queue, \
     get_queue_status, next_queue, previous_queue, remaining_queue, \
     reset_queue
-from tqs.models import Log, Manager
-
-
-# load setting
-queue_interval = os.environ.get('QUEUE_INTERVAL', 5000)
-
-# load config/key
-load_config()
-load_key()
+from tqs.models import Manager
 
 
 @login_manager.user_loader
@@ -165,7 +152,3 @@ def logout():
 def unauthorized():
     app.logger.warning('Attempted request to unauthorized page.')
     return redirect(url_for('_login'))
-
-
-if __name__ == '__main__':
-    app.run()
