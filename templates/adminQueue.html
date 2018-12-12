@@ -64,17 +64,17 @@
 		<div class="jumbotron">
 			<h1>Token Queue</h1>
 			<div class="row">
-				<div class="col">
+				<div class="col-sm-3">
 					{% if queue > 1 %}
 					<h4>Previous Queue</h4>
 					<h3>{{ queue - 1 }}</h3>
 					<a href="{{ url_for('queue_previous') }}" class="btn btn-lg btn-warning btn-block">BACK</a>
 					{% endif %}
 				</div>
-				<div class="col-6">
+				<div class="col-sm-6">
 					<div class="queue">{{ queue }}</div>
 				</div>
-				<div class="col">
+				<div class="col-sm-3">
 					<div id="next-queue" style="visibility: hidden;">
 						<h4>Next Queue</h4>
 						<h3>{{ queue + 1 }}</h3>
