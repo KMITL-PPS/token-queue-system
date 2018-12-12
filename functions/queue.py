@@ -24,6 +24,15 @@ def total_queue() -> int:
     return read_config('total_queue')
 
 
+def get_queue_status(queue: int) -> str:
+    current_queue = get_queue()
+    if queue == current_queue:
+        return 'current'
+    elif queue < current_queue:
+        return 'passed'
+    return 'not yet'
+
+
 def can_next_queue() -> bool:
     return get_queue() < total_queue()
 

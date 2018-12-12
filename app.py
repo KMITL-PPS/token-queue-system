@@ -1,16 +1,20 @@
+import json
 import os
 
 from dotenv import load_dotenv
-from flask import Flask, flash, jsonify, redirect, render_template, url_for
+from flask import Flask, flash, jsonify, redirect, render_template, request, \
+    url_for
+from flask_jwt import JWT, jwt_required
 from flask_login import LoginManager, login_required, login_user, logout_user
 from passlib.hash import bcrypt
 
 from forms import LoginForm
 from functions.config import load_config
-from functions.key import generate_key, load_key, set_key
+from functions.key import decrypt, generate_key, load_key, set_key
 from functions.qr import generate_qr
 from functions.queue import can_next_queue, create_queue, get_queue, \
-    next_queue, previous_queue, remaining_queue, reset_queue
+    get_queue_status, next_queue, previous_queue, remaining_queue, \
+    reset_queue
 from models import Manager, db
 
 
@@ -28,6 +32,22 @@ app.config.update(
     SQLALCHEMY_TRACK_MODIFICATIONS=False,
 )
 
+# JWT
+def identity(payload):
+    manager_id = payload['identity']
+    return Manager.query.get(manager_id)
+
+def auth_user(username: str, password: str):
+    # get user
+    manager = Manager.query.filter(Manager.username == username).first()
+    # verify password if user is exists
+    if manager is not None and bcrypt.verify(password, manager.password):
+        return manager
+    return None
+
+# init jwt
+jwt = JWT(app, auth_user, identity)
+
 # init app
 with app.app_context():
     # database
@@ -44,8 +64,9 @@ load_key()
 
 
 @login_manager.user_loader
-def load_user(user_id):
-    return Manager.query.get(user_id)
+def load_user(manager_id: int):
+    print(manager_id)
+    return Manager.query.get(manager_id)
 
 
 @app.route('/', methods=['GET'])
@@ -64,13 +85,11 @@ def qr():
 def _login():
     form = LoginForm()
 
-    # submit form
+    # submit form (POST)
     if form.validate_on_submit():
-        # get user
-        manager = Manager.query.filter(Manager.username == form.username.data).first()
-
-        # verify password if user is exists
-        if manager is not None and bcrypt.verify(form.password.data, manager.password):
+        # authenticate user
+        manager = auth_user(username=form.username.data, password=form.password.data)
+        if manager is not None:
             login_user(manager)
             flash('Log in successfully!')
             return redirect(url_for('admin'))
@@ -117,6 +136,34 @@ def queue_reset():
     new_key = generate_key()
     set_key(new_key, reload=True)
     return redirect(url_for('admin'))
+
+
+@app.route('/queue/verify', methods=['POST'])
+# @login_required
+@jwt_required()
+def queue_verify():
+    data = json.loads(request.data)
+    data = data['data']
+
+    # decrypt data and prepare response
+    try:
+        response_data = decrypt(data)
+    except Exception as e:
+        response_data = {
+            'error': 'Error',
+            'description': str(e)
+        }
+        return jsonify(response_data), 400
+
+    # get queue status
+    queue_status = get_queue_status(response_data['queue'])
+    if queue_status == 'current':
+        response_data['valid'] = True
+    else:
+        response_data['valid'] = False
+        response_data['status'] = queue_status
+
+    return jsonify(response_data)
 
 
 @app.route('/logout', methods=['GET'])

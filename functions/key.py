@@ -1,7 +1,8 @@
 import json
 from collections import OrderedDict
+from json import JSONDecodeError
 
-from cryptography.fernet import Fernet
+from cryptography.fernet import Fernet, InvalidToken, InvalidSignature
 
 from functions.config import read_config, write_config
 
@@ -39,7 +40,17 @@ def decrypt(data: str):
     if suite is None:  # error occurred
         return None
 
-    decrypted_data = suite.decrypt(data.encode()).decode()
+    try:
+        decrypted_data = suite.decrypt(data.encode()).decode()
+    except InvalidToken:
+        raise Exception('Invalid token.')
+    except InvalidSignature:
+        raise Exception('Invalid signature.')
+
     if decrypted_data.isdigit():
         return int(decrypted_data)
+    try:
+        return json.loads(decrypted_data)
+    except JSONDecodeError:
+        pass
     return decrypted_data
