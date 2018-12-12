@@ -37,7 +37,11 @@
 </head>
 
 <body>
-	<div class="alert alert-danger"><b>ERROR</b></div>
+	{% if error %}
+		<div class="alert alert-danger">
+			<b>ERROR:</b> {{ error }}
+		</div>
+	{% endif %}
 	<div class="container">
 		<div class="jumbotron">
 			<h1>Token Queue</h1>

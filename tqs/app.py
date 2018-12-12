@@ -51,6 +51,7 @@ def qr():
 
 @app.route('/login', methods=['GET', 'POST'])
 def _login():
+    error = None
     form = LoginForm()
 
     # submit form (POST)
@@ -61,14 +62,13 @@ def _login():
             login_user(manager)
 
             app.logger.info(f'Manager `{manager.alias}` logged in.')
-            flash('Log in successfully!')
             return redirect(url_for('admin'))
 
         app.logger.info(f'Attempt to log in with username `{form.username.data}`.')
-        flash('Invalid username or password!')
+        error = 'Invalid username or password!'
 
     # GET
-    return render_template('login.html', form=form)
+    return render_template('login.html', form=form, error=error)
 
 
 @app.route('/admin', methods=['GET'])
