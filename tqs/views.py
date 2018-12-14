@@ -62,8 +62,8 @@ def qr():
 @app.route('/login', methods=['GET', 'POST'])
 def _login():
     # redirect if logged in
-    if current_user is not None:
-        return redirect(url_for('admin'))
+    # if current_user is not None:
+    #     return redirect(url_for('admin'))
 
     error = None
     form = LoginForm()
